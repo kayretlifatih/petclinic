@@ -60,9 +60,12 @@ jobs:
           name: pet-clinic-jar
           path: target  
       -
-        name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: kayretli/fatihclinic:${{ github.sha }}
+        name: Build, tag, and push image to DockerHub
+        id: build-image
+        env:
+         DOCKER_REGISTRY: kayretli
+         DOCKER_REPOSITORY: fatihclinic
+        run: |  
+          docker build -t $DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6} admin-panel
+          docker push $DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6}
+          echo "::set-output name=image::$DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6}"
