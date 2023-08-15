@@ -28,6 +28,13 @@ jobs:
           cache: maven
       - name: Build with Maven Wrapper
         run: ./mvnw -B package
+      - name: Upload Jar File
+        uses: actions/upload-artifact@v1
+        with:
+          name: pet-clinic-jar
+          path: target
+      
+
     
   docker:
     runs-on: ubuntu-latest  
@@ -46,6 +53,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Download pet-clinic Jar
+        uses: actions/download-artifact@v1
+        with:
+          name: pet-clinic-jar
+          path: target  
       -
         name: Build and push
         uses: docker/build-push-action@v4
