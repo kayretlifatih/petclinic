@@ -66,6 +66,6 @@ jobs:
          DOCKER_REGISTRY: kayretli
          DOCKER_REPOSITORY: fatihclinic
         run: |  
-          docker build -t $DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6} admin-panel
+          docker build -t $DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6} .
           docker push $DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6}
           echo "::set-output name=image::$DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6}"
