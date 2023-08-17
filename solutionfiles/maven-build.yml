@@ -1,0 +1,66 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: #manuel trigger için.
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '17' ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK ${{matrix.java}}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{matrix.java}}
+          distribution: 'adopt'
+          cache: maven
+      - name: Build with Maven Wrapper
+        run: ./mvnw -B package
+      - name: Upload Jar File
+        uses: actions/upload-artifact@v1
+        with:
+          name: pet-clinic-jar
+          path: target
+      
+
+    
+  docker:
+  
+    runs-on: ubuntu-latest  
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Download pet-clinic Jar
+        uses: actions/download-artifact@v1
+        with:
+          name: pet-clinic-jar
+          path: target  
+      -
+        name: Build, tag, and push image to DockerHub
+        id: build-image
+        env:
+         DOCKER_REGISTRY: kayretli
+         DOCKER_REPOSITORY: fatihclinic
+        run: |  
+          docker build -t $DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6} .
+          docker push $DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6}
+          echo "::set-output name=image::$DOCKER_REGISTRY/$DOCKER_REPOSITORY:${GITHUB_SHA:0:6}"

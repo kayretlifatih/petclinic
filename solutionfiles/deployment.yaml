@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-petclinic-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fatihclinic
+  template:
+    metadata:
+      labels:
+        app: fatihclinic
+    spec:
+      containers:
+        - name: spring-petclinic-container
+          image: kayretli/fatihclinic:latest 
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MYSQL_URL
+              value: "jdbc:mysql://mysql-service.default.svc.cluster.local/petclinic"
+            - name : MYSQL_USER
+              value: petclinic
+            - name : MYSQL_PASSWORD
+              value: petclinic
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-petclinic-service
+spec:
+  selector:
+    app: fatihclinic
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer
